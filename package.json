@@ -1,0 +1,32 @@
+{
+  "name": "archi-wiki",
+  "version": "1.0.0",
+  "description": "Archive / Version Documents in Confluence",
+  "main": "index.js",
+  "type": "module",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=7.0.0",
+    "yarn": "Please use npm",
+    "pnpm": "Please use npm"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/raj-sampath/archi-wiki.git"
+  },
+  "author": "Shyam Raj Sampath (raj_sampath@msn.com)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/raj-sampath/archi-wiki/issues"
+  },
+  "homepage": "https://github.com/raj-sampath/archi-wiki#readme",
+  "devDependencies": {
+    "prettier": "3.3.3"
+  },
+  "dependencies": {
+    "@forge/api": "^4.1.0"
+  }
+}
