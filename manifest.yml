@@ -1,7 +1,5 @@
 modules:
   webtrigger:
-    - key: archiwiki-webtrigger-sync
-      function: sync
     - key: archiwiki-webtrigger-async
       function: async
   function:

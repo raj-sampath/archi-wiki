@@ -1,15 +1,15 @@
+import { createResponse, Logger, RequestBodySchema } from "./helpers/utils.js";
+import {
+  HTTP_CONTENT_TYPES,
+  HTTP_REQUEST_STATUS,
+  HTTP_STATUS_CODES,
+} from "./helpers/constants.js";
+import { validateConfluenceWiki } from "./helpers/jsonToConfluenceWiki.js";
+import { createPage } from "./helpers/confluence.js";
+
 /**
- * @returns {import('@forge/api').WebTriggerResponse}
+ * @typedef {import('src/helpers/types.d.ts').CreatePageRequest} CreatePageRequest
  */
-const buildOutput = (rnd) => ({
-  body: '{"hello": "world"}',
-  headers: {
-    "Content-Type": ["application/json"],
-    "X-Request-Id": [`rnd-${rnd}`],
-  },
-  statusCode: 200,
-  statusText: "OK",
-});
 
 /**
  * @param {import('@forge/api').WebTriggerRequest} event
@@ -17,19 +17,73 @@ const buildOutput = (rnd) => ({
  * @returns {Promise<import('@forge/api').WebTriggerResponse>}
  */
 export async function runAsync(event, context) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const result = buildOutput(Math.random());
-      resolve(result);
-    }, 1000);
-  });
-}
+  Logger.info(`Event: ${JSON.stringify(event)}`);
 
-/**
- * @param {import('@forge/api').WebTriggerRequest} event
- * @param {import('@forge/api').WebTriggerContext} context
- * @returns {import('@forge/api').WebTriggerResponse}
- */
-export function runSync(event, context) {
-  return buildOutput(Math.random());
+  if (event.method !== "POST") {
+    return createResponse(
+      HTTP_STATUS_CODES.METHOD_NOT_ALLOWED,
+      undefined,
+      "Method Not Allowed",
+    );
+  }
+
+  try {
+    /**
+     * @type {CreatePageRequest}
+     */
+    const body = JSON.parse(event.body);
+
+    // Validate the request body
+    const response = RequestBodySchema.safeParse(body);
+
+    if (!response.success) {
+      return createResponse(
+        HTTP_STATUS_CODES.BAD_REQUEST,
+        { "Content-Type": [HTTP_CONTENT_TYPES.APPLICATION_JSON] },
+        JSON.stringify({
+          status: HTTP_REQUEST_STATUS.FAILED,
+          error: response.error,
+        }),
+      );
+    }
+
+    // Validate the Page Body
+    const pageBodyValidationResponse = validateConfluenceWiki(body.page);
+    if (!pageBodyValidationResponse.success) {
+      return createResponse(
+        HTTP_STATUS_CODES.BAD_REQUEST,
+        { "Content-Type": [HTTP_CONTENT_TYPES.APPLICATION_JSON] },
+        JSON.stringify({
+          status: HTTP_REQUEST_STATUS.FAILED,
+          error: pageBodyValidationResponse.error,
+        }),
+      );
+    }
+
+    // Create the page
+    const createPageResult = await createPage(
+      body.page,
+      body.title,
+      body.spaceId,
+      body.parentId,
+    );
+
+    return createResponse(
+      HTTP_STATUS_CODES.OK,
+      { "Content-Type": [HTTP_CONTENT_TYPES.APPLICATION_JSON] },
+      JSON.stringify({
+        status: HTTP_REQUEST_STATUS.SUCCESS,
+        message: createPageResult,
+      }),
+    );
+  } catch (e) {
+    return createResponse(
+      HTTP_STATUS_CODES.BAD_REQUEST,
+      { "Content-Type": [HTTP_CONTENT_TYPES.APPLICATION_JSON] },
+      JSON.stringify({
+        status: HTTP_REQUEST_STATUS.FAILED,
+        error: e.message,
+      }),
+    );
+  }
 }
