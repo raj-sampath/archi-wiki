@@ -3,8 +3,6 @@ modules:
     - key: archiwiki-webtrigger-async
       function: async
   function:
-    - key: sync
-      handler: index.runSync
     - key: async
       handler: index.runAsync
 app:
