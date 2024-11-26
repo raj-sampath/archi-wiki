@@ -46,4 +46,22 @@ describe("Function: validateConfluenceWiki", () => {
       ]).success,
     ).toBe(true);
   });
+
+  it("Should return False if more than one key is present in Page Element Row", () => {
+    expect(
+      validateConfluenceWiki([
+        {
+          h1: "This is a Header",
+          table: {
+            headers: ["Column 1"],
+            rows: [["Row 1"]],
+          },
+        },
+      ]).success,
+    ).toBe(false);
+  });
+
+  it("Should return False if a blank Page Element Row is present in the Page Element Row", () => {
+    expect(validateConfluenceWiki([{}]).success).toBe(false);
+  });
 });

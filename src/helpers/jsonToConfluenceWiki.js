@@ -79,8 +79,8 @@ export function validateConfluenceWiki(page) {
           code: z.object({ language: z.string(), code: z.string() }).optional(),
         })
         .strict()
-        .refine((obj) => Object.entries(obj).length !== 1, {
-          message: "Only one Confluence Attribute is allowed per row",
+        .refine((obj) => Object.entries(obj).length === 1, {
+          message: "Only one key is allowed",
         }),
     )
     .min(1);
