@@ -45,3 +45,12 @@ export const RequestBodySchema = z.object({
   title: z.string().min(3),
   page: z.array(z.object({})).min(1),
 });
+
+/**
+ *
+ * @param value { Object }
+ * @returns {string}
+ */
+export function hashify(value) {
+  return crypto.createHash("md5").update(value).digest("hex");
+}

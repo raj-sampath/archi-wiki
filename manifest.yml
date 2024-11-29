@@ -14,3 +14,4 @@ permissions:
     - read:space:confluence
     - read:page:confluence
     - write:page:confluence
+    - storage:app

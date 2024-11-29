@@ -60,6 +60,8 @@ export async function runAsync(event, context) {
       );
     }
 
+    Logger.info("Request Validated, Now Creating The Page");
+
     // Create the page
     const createPageResult = await createPage(
       body.page,
