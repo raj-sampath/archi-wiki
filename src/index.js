@@ -17,8 +17,6 @@ import { createPage, getStorageContents } from "./helpers/confluence.js";
  * @returns {Promise<import('@forge/api').WebTriggerResponse>}
  */
 export async function storage(event, context) {
-  console.log("In Storage Function - Index.js");
-
   const listResult = await getStorageContents();
 
   return createResponse(

@@ -9,14 +9,13 @@ import { hashify } from "./utils.js";
  */
 
 /**
+ * This function creates a new page in Confluence using the Forge APIs {@link https://developer.atlassian.com/cloud/confluence/rest/v2/api-group-page/#api-group-page}
  * @param {string} title
  * @param {string} spaceId
  * @param {string} parentId
  * @param {Page} page
  * @returns {Promise<{error}|any>}
  */
-
-let PAGE_CREATE_METHOD = "POST";
 
 export async function createPage(page, title, spaceId, parentId) {
   const key = `${parentId}-${title}`;
@@ -29,24 +28,6 @@ export async function createPage(page, title, spaceId, parentId) {
    */
 
   const existingPage = await storage.get(key);
-
-  const body = JSON.stringify({
-    id: existingPage ? existingPage.pageId : undefined,
-    spaceId,
-    status: "current",
-    title,
-    parentId,
-    body: {
-      representation: "wiki",
-      value: jsonToConfluenceWiki(page),
-    },
-    version: existingPage
-      ? {
-          number: existingPage.version + 1,
-          message: `Updated on ${now}`,
-        }
-      : undefined,
-  });
 
   if (existingPage) {
     const newHash = hashify(JSON.stringify({ title, page, spaceId, parentId }));
@@ -93,15 +74,29 @@ export async function createPage(page, title, spaceId, parentId) {
         childBodyResponseJson.errors.map((e) => e.title).join(", "),
       );
     }
-
-    PAGE_CREATE_METHOD = "PUT";
   }
-
-  console.log(JSON.stringify(body, null, 2));
 
   let response;
 
-  if (PAGE_CREATE_METHOD === "PUT") {
+  const parentBody = JSON.stringify({
+    id: existingPage ? existingPage.pageId : undefined,
+    spaceId,
+    status: "current",
+    title,
+    parentId,
+    body: {
+      representation: "wiki",
+      value: jsonToConfluenceWiki(page),
+    },
+    version: existingPage
+      ? {
+          number: existingPage.version + 1,
+          message: `Updated on ${now}`,
+        }
+      : undefined,
+  });
+
+  if (existingPage) {
     response = await api
       .asApp()
       .requestConfluence(route`/wiki/api/v2/pages/${existingPage.pageId}`, {
@@ -110,7 +105,7 @@ export async function createPage(page, title, spaceId, parentId) {
           Accept: "application/json",
           "Content-Type": "application/json",
         },
-        body,
+        body: parentBody,
       });
   } else {
     response = await api
@@ -121,7 +116,7 @@ export async function createPage(page, title, spaceId, parentId) {
           Accept: "application/json",
           "Content-Type": "application/json",
         },
-        body,
+        body: parentBody,
       });
   }
 
@@ -155,6 +150,5 @@ export async function createPage(page, title, spaceId, parentId) {
  * @returns {Promise<ListResult>}
  */
 export async function getStorageContents() {
-  console.log("In Storage Function - Confluence.js");
   return await storage.query().limit(20).getMany();
 }
