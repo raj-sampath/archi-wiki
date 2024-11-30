@@ -1,23 +1,6 @@
 import { HTTP_STATUS_CODES } from "./constants.js";
-import winston, { format } from "winston";
-const { timestamp, prettyPrint, json, label } = format;
 import { z } from "zod";
-
-/**
- * Creates an Instance of Windston Logger
- * The logger is configured to log in JSON format, with a timestamp and a label archi-wiki
- * @type {winston.Logger}
- */
-export const Logger = winston.createLogger({
-  level: "info",
-  format: format.combine(
-    timestamp(),
-    prettyPrint(),
-    label({ label: "archi-wiki" }),
-    json(),
-  ),
-  transports: [new winston.transports.Console()],
-});
+import crypto from "crypto";
 
 /**
  *

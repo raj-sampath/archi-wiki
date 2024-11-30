@@ -24,3 +24,50 @@ export type Page = {
     code: string;
   };
 }[];
+
+export type ConfulencePageCreateResponse = Partial<{
+  parentType: string;
+  ownerId: string;
+  lastOwnerId: any;
+  createdAt: string;
+  authorId: string;
+  version: {
+    number: number;
+    message: string;
+    minorEdit: boolean;
+    authorId: string;
+    createdAt: string;
+  };
+  position: number;
+  title: string;
+  status: string;
+  body: {
+    storage: {
+      representation: string;
+      value: string;
+    };
+  };
+  parentId: string;
+  spaceId: string;
+  id: string;
+  _links: {
+    editui: string;
+    webui: string;
+    edituiv2: string;
+    tinyui: string;
+    base: string;
+  };
+  errors: {
+    title: string;
+    status: number;
+    code: string;
+  }[];
+}>;
+
+export type KeyValueStorage = {
+  hash: string;
+  date: string;
+  pageId: string;
+  wiki: string;
+  version: number;
+};

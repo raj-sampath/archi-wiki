@@ -1,11 +1,11 @@
-import { createResponse, Logger, RequestBodySchema } from "./helpers/utils.js";
+import { createResponse, RequestBodySchema } from "./helpers/utils.js";
 import {
   HTTP_CONTENT_TYPES,
   HTTP_REQUEST_STATUS,
   HTTP_STATUS_CODES,
 } from "./helpers/constants.js";
 import { validateConfluenceWiki } from "./helpers/jsonToConfluenceWiki.js";
-import { createPage } from "./helpers/confluence.js";
+import { createPage, getStorageContents } from "./helpers/confluence.js";
 
 /**
  * @typedef {import('src/helpers/types.d.ts').CreatePageRequest} CreatePageRequest
@@ -16,10 +16,28 @@ import { createPage } from "./helpers/confluence.js";
  * @param {import('@forge/api').WebTriggerContext} context
  * @returns {Promise<import('@forge/api').WebTriggerResponse>}
  */
-export async function runAsync(event, context) {
-  Logger.info(`Event: ${JSON.stringify(event)}`);
+export async function storage(event, context) {
+  console.log("In Storage Function - Index.js");
 
-  if (event.method !== "POST") {
+  const listResult = await getStorageContents();
+
+  return createResponse(
+    HTTP_STATUS_CODES.OK,
+    { "Content-Type": [HTTP_CONTENT_TYPES.APPLICATION_JSON] },
+    JSON.stringify({
+      status: HTTP_REQUEST_STATUS.SUCCESS,
+      data: listResult,
+    }),
+  );
+}
+
+/**
+ * @param {import('@forge/api').WebTriggerRequest} event
+ * @param {import('@forge/api').WebTriggerContext} context
+ * @returns {Promise<import('@forge/api').WebTriggerResponse>}
+ */
+export async function runAsync(event, context) {
+  if (!["POST", "PUT"].includes(event.method)) {
     return createResponse(
       HTTP_STATUS_CODES.METHOD_NOT_ALLOWED,
       undefined,
@@ -60,7 +78,7 @@ export async function runAsync(event, context) {
       );
     }
 
-    Logger.info("Request Validated, Now Creating The Page");
+    console.log("Request Validated, Now Creating The Page");
 
     // Create the page
     const createPageResult = await createPage(
